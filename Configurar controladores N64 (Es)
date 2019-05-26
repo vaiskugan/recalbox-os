@@ -1,0 +1,113 @@
+Configurar controladores N64 (EN)
+Paul editó esta página on 25 Mar · 10 revisiones
+EDITAR
+De forma predeterminada, / usr / share / mupen64plus es de solo lectura, por lo que esto no funcionará a menos que habilite el modo de lectura-escritura usando este comando mount -o remount, rw /
+
+EDITAR PARA RECALBOX> V4.1
+jstest ya no sale -> usa sdl2-jstest
+
+En caso de que su botón 0 salga del emulador (como lo haría la tecla de acceso directo), tendrá que modificar el siguiente archivo: ~ / configs / mupen64 / mupen64plus.cfg => Cambiar el parámetro Joy Mapping Stop = "J1B0" por Joy Mapping Stop = ""
+
+RECALBOX V3.3.0 SOLAMENTE
+Mupen64plus no se configura automáticamente por recalbox como los otros emuladores. Así que hay que hacerlo manualmente.
+
+Para información: su botón de acceso directo se asignará automáticamente a la función de salida del emulador.
+
+A - Agregue la configuración de su controlador al sistema:
+Para configurar su controlador, necesitará información al respecto. Vaya al acceso raíz y use el comando jstest :
+
+jstest /dev/input/js0
+
+En mi caso, me sale:
+
+Joystick (Broadcom Bluetooth Wireless  Joystick                        ) has 6 axes (X, Y, Z, Rz, Hat0X, Hat0Y)
+and 12 buttons (Trigger, ThumbBtn, ThumbBtn2, TopBtn, TopBtn2, PinkieBtn, BaseBtn, BaseBtn2, BaseBtn3, BaseBtn4, BaseBtn5, BaseBtn6).
+Una vez que se identifique el nombre del controlador y cada botón, deberá editar este archivo /usr/share/mupen64plus/InputAutoCfg.ini
+
+Utilice este comando:
+
+nano /usr/share/mupen64plus/InputAutoCfg.ini
+
+Ahora, al final del archivo, agregue las informaciones de la configuración, como esta:
+
+Esta plantilla es un ejemplo, con información sobre mi controlador (nombre del controlador, número de botón, etc.). Necesitas adaptarlo con las informaciones de tu propio controlador.
+
+[Broadcom Bluetooth Wireless  Joystick                        ]
+plugged = True
+plugin = 2
+mouse = False
+AnalogDeadzone = 4096,4096
+AnalogPeak = 32768,32768
+DPad R = hat(0 Right)
+DPad L = hat(0 Left)
+DPad D = hat(0 Down)
+DPad U = hat(0 Up)
+Start = button(9)
+Z Trig = button(7)
+B Button = button(2)
+A Button = button(1)
+C Button R = axis(3+)
+C Button L = axis(3-)
+C Button D = axis(2+)
+C Button U = axis(2-)
+R Trig = button(5)
+L Trig = button(4)
+Mempak switch = button(6)
+Rumblepak switch = 
+X Axis = axis(0-,0+)
+Y Axis = axis(1-,1+)
+Una vez que su configuración sea correcta, haga Ctrl+xpara salir de nano, acepte para sobrescribir el archivo con yy presione Enterpara salir. 
+Ahora puede iniciar un juego N64 y probar su configuración.
+
+¿Tu configuración está bien, te encanta? Genial ^^ 
+Pero, hay un "problema". Cuando actualiza su recalbox, todos estos archivos de configuración también se actualizan. 
+Por lo tanto, se restablecerán. 
+Si no quiere hacerlo después de cada actualización, haga una copia de seguridad de su InputAutoCfg.iniarchivo. 
+También puede agregar su configuración a recalbox. Debe dirigirse a este problema y publicar su propia configuración como comentario. 
+Luego lo agregaremos al sistema en la próxima actualización de recalbox. (Ya no es necesario porque un configgen está integrado desde la versión 4.0.0 de recalbox)
+
+B - Añadir comandos especiales
+Mupen64plus no admite combinaciones de botones, como emuladores retroarch, para iniciar comandos especiales. 
+Pero puede afectar a los botones no utilizados de un comando específico, como guardar / cargar un savestate, cambiar slestate slots, etc.
+
+Para hacerlo, por primera vez, debe identificar todos los botones no utilizados en su configuración. 
+Entonces, como se vio antes, vaya al acceso de root y use el comando jstest , luego anote el número de código de sus botones no utilizados.
+
+Ahora, siempre en acceso raíz, edite su mupen64plus.cfgarchivo con este comando:
+
+nano /recalbox/configs/mupen64/mupen64plus.cfg
+
+Luego entra en la sección llamada [CoreEvents]. La parte útil, es esta:
+
+# Joystick event string for stopping the emulator
+Joy Mapping Stop = ""
+# Joystick event string for switching between fullscreen/windowed modes
+Joy Mapping Fullscreen = ""
+# Joystick event string for saving the emulator state
+Joy Mapping Save State = ""
+# Joystick event string for loading the emulator state
+Joy Mapping Load State = ""
+# Joystick event string for advancing the save state slot
+Joy Mapping Increment Slot = ""
+# Joystick event string for taking a screenshot
+Joy Mapping Screenshot = ""
+# Joystick event string for pausing the emulator
+Joy Mapping Pause = ""
+# Joystick event string for muting/unmuting the sound
+Joy Mapping Mute = ""
+# Joystick event string for increasing the volume
+Joy Mapping Increase Volume = ""
+# Joystick event string for decreasing the volume
+Joy Mapping Decrease Volume = ""
+# Joystick event string for fast-forward
+Joy Mapping Fast Forward = ""
+# Joystick event string for pressing the game shark button
+Joy Mapping Gameshark = ""
+Algo para tener en cuenta, es que Mupen64plus, identifique player 1como J0, player 2como J1etc ... 
+Entonces, por ejemplo, si desea agregar el botón número 10 del jugador 1 al comando "save savestates" , necesita editar su archivo Me gusta esto :
+Joy Mapping Save State = "J0B10"
+
+Y si desea agregar el botón 5, del reproductor 2, al comando "load savestates" , editará su archivo así:
+Joy Mapping Load State = "J1B5"
+
+Una vez que su configuración sea correcta, haga Ctrl+xpara salir de nano, acepte para sobrescribir el archivo con yy presione Enterpara salir.
